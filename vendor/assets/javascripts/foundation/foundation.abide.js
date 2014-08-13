@@ -169,7 +169,7 @@
             label = this.S('label[for="' + el.getAttribute('id') + '"]'),
             valid_length = (required) ? (el.value.length > 0) : true;
 
-        var parent, valid;
+        var parent, valid = true;
 
         // support old way to do equalTo validations
         if(el.getAttribute(this.add_namespace('data-equalto'))) { validator = "equalTo" }
@@ -188,19 +188,21 @@
           
           if (validator) {
             valid = this.settings.validators[validator].apply(this, [el, required, parent]);
-            validations.push(valid);
           }
-
-          if (el_patterns[i][1].test(value) && valid_length ||
-            !required && el.value.length < 1 || $(el).attr('disabled')) {
-            validations.push(true);
-          } else {
-            validations.push(false);
+          
+          if(valid) {
+            if (el_patterns[i][1].test(value) && valid_length ||
+              !required && el.value.length < 1 || $(el).attr('disabled')) {
+              valid = true;
+            } else {
+              valid = false;
+            }
           }
-
+          
+          validations.push(valid);
           validations = [validations.every(function(valid){return valid;})];
 
-          if(validations[0]){
+          if(valid){
             this.S(el).removeAttr(this.invalid_attr);
             parent.removeClass('error');
             if (label.length > 0 && this.settings.error_labels) label.removeClass('error');
